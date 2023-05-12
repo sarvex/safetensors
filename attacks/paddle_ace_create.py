@@ -6,10 +6,7 @@ def _parse_every_object(obj, condition_func, convert_func):
     if condition_func(obj):
         return convert_func(obj)
     elif isinstance(obj, (dict, OrderedDict, list)):
-        if isinstance(obj, list):
-            keys = range(len(obj))
-        else:
-            keys = list(obj.keys())
+        keys = range(len(obj)) if isinstance(obj, list) else list(obj.keys())
         for key in keys:
             if condition_func(obj[key]):
                 obj[key] = convert_func(obj[key])

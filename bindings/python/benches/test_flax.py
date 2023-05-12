@@ -7,8 +7,7 @@ from safetensors.flax import load_file, save_file
 
 
 def create_gpt2(n_layers: int):
-    tensors = {}
-    tensors["wte"] = jnp.zeros((50257, 768))
+    tensors = {"wte": jnp.zeros((50257, 768))}
     tensors["wpe"] = jnp.zeros((1024, 768))
     for i in range(n_layers):
         tensors[f"h.{i}.ln_1.weight"] = jnp.zeros((768,))
@@ -32,8 +31,7 @@ def create_gpt2(n_layers: int):
 def load(filename):
     with open(filename, "rb") as f:
         data = f.read()
-        flax_weights = msgpack_restore(data)
-        return flax_weights
+        return msgpack_restore(data)
 
 
 def test_flax_flax_load(benchmark):

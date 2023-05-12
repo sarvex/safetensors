@@ -8,8 +8,7 @@ from safetensors.paddle import load_file, save_file
 
 
 def create_gpt2(n_layers: int):
-    tensors = {}
-    tensors["wte"] = paddle.zeros((50257, 768))
+    tensors = {"wte": paddle.zeros((50257, 768))}
     tensors["wpe"] = paddle.zeros((1024, 768))
     for i in range(n_layers):
         tensors[f"h.{i}.ln_1.weight"] = paddle.zeros((768,))

@@ -37,8 +37,7 @@ def save(tensor_dict: Dict[str, np.ndarray], metadata: Optional[Dict[str, str]] 
             raise ValueError("Safetensor format only accepts little endian")
     flattened = {k: {"dtype": v.dtype.name, "shape": v.shape, "data": v.tobytes()} for k, v in tensor_dict.items()}
     serialized = serialize(flattened, metadata=metadata)
-    result = bytes(serialized)
-    return result
+    return bytes(serialized)
 
 
 def save_file(
@@ -166,14 +165,9 @@ def _view2np(safeview) -> Dict[str, np.ndarray]:
 def _is_little_endian(tensor: np.ndarray) -> str:
     byteorder = tensor.dtype.byteorder
     if byteorder == "=":
-        if sys.byteorder == "little":
-            return True
-        else:
-            return False
-    elif byteorder == "|":
-        return True
-    elif byteorder == "<":
-        return True
+        return sys.byteorder == "little"
     elif byteorder == ">":
         return False
+    elif byteorder in ["|", "<"]:
+        return True
     raise ValueError(f"Unexpected byte order {byteorder}")

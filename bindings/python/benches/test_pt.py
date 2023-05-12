@@ -8,8 +8,7 @@ from safetensors.torch import load_file, save_file
 
 
 def create_gpt2(n_layers: int):
-    tensors = {}
-    tensors["wte"] = torch.zeros((50257, 768))
+    tensors = {"wte": torch.zeros((50257, 768))}
     tensors["wpe"] = torch.zeros((1024, 768))
     for i in range(n_layers):
         tensors[f"h.{i}.ln_1.weight"] = torch.zeros((768,))

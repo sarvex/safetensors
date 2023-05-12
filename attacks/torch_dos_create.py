@@ -16,7 +16,7 @@ with ZipFile(filename, "r") as torch_zip:
         outzip.writestr("archive/data.pkl", torch_zip.open("archive/data.pkl").read())
         outzip.writestr("archive/version", torch_zip.open("archive/version").read())
         with outzip.open("archive/data/0", "w", force_zip64=True) as f:
-            for i in range(FILESIZE):
+            for _ in range(FILESIZE):
                 f.write(BUFFER)
 
 os.remove(filename)

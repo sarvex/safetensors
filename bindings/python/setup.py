@@ -32,8 +32,7 @@ def deps_list(*pkgs):
     return [deps[pkg] for pkg in pkgs]
 
 
-extras = {}
-extras["torch"] = deps_list("torch")
+extras = {"torch": deps_list("torch")}
 extras["numpy"] = deps_list("numpy")
 extras["tensorflow"] = deps_list("tensorflow")
 extras["jax"] = deps_list("jax", "flax")

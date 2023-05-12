@@ -34,8 +34,7 @@ def save(tensors: Dict[str, torch.Tensor], metadata: Optional[Dict[str, str]] = 
     ```
     """
     serialized = serialize(_flatten(tensors), metadata=metadata)
-    result = bytes(serialized)
-    return result
+    return bytes(serialized)
 
 
 def save_file(
@@ -224,12 +223,7 @@ def _flatten(tensors: Dict[str, torch.Tensor]) -> Dict[str, Dict[str, Any]]:
         if v.layout == torch.strided:
             ptrs[v.data_ptr()].add(k)
 
-    failing = []
-    for ptr, names in ptrs.items():
-        if len(names) > 1:
-            failing.append(names)
-
-    if failing:
+    if failing := [names for names in ptrs.values() if len(names) > 1]:
         raise RuntimeError(
             f"""Some tensors share memory, this will lead to duplicate memory on disk and potential differences when loading them again: {failing}"""
         )

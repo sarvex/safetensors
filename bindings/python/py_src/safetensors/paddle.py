@@ -122,8 +122,7 @@ def load_file(filename: Union[str, os.PathLike], device="cpu") -> Dict[str, padd
     ```
     """
     flat = numpy.load_file(filename)
-    output = _np2paddle(flat, device)
-    return output
+    return _np2paddle(flat, device)
 
 
 def _np2paddle(numpy_dict: Dict[str, np.ndarray], device: str = "cpu") -> Dict[str, paddle.Tensor]:

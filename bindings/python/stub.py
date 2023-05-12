@@ -29,16 +29,11 @@ def function(obj, indent, text_signature=None):
 
 
 def member_sort(member):
-    if inspect.isclass(member):
-        value = 10 + len(inspect.getmro(member))
-    else:
-        value = 1
-    return value
+    return 10 + len(inspect.getmro(member)) if inspect.isclass(member) else 1
 
 
 def fn_predicate(obj):
-    value = inspect.ismethoddescriptor(obj) or inspect.isbuiltin(obj)
-    if value:
+    if value := inspect.ismethoddescriptor(obj) or inspect.isbuiltin(obj):
         return obj.__doc__ and obj.__text_signature__ and not obj.__name__.startswith("_")
     if inspect.isgetsetdescriptor(obj):
         return obj.__doc__ and not obj.__name__.startswith("_")
@@ -66,10 +61,7 @@ def pyi_file(obj, indent=""):
     elif inspect.isclass(obj):
         indent += INDENT
         mro = inspect.getmro(obj)
-        if len(mro) > 2:
-            inherit = f"({mro[1].__name__})"
-        else:
-            inherit = ""
+        inherit = f"({mro[1].__name__})" if len(mro) > 2 else ""
         string += f"class {obj.__name__}{inherit}:\n"
 
         body = ""

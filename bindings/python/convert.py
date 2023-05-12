@@ -24,11 +24,7 @@ def shared_pointers(tensors):
     ptrs = defaultdict(list)
     for k, v in tensors.items():
         ptrs[v.data_ptr()].append(k)
-    failing = []
-    for ptr, names in ptrs.items():
-        if len(names) > 1:
-            failing.append(names)
-    return failing
+    return [names for names in ptrs.values() if len(names) > 1]
 
 
 def check_file_size(sf_filename: str, pt_filename: str):
@@ -68,17 +64,18 @@ def convert_multi(model_id: str, folder: str) -> List["CommitOperationAdd"]:
 
     index = os.path.join(folder, "model.safetensors.index.json")
     with open(index, "w") as f:
-        newdata = {k: v for k, v in data.items()}
+        newdata = dict(data.items())
         newmap = {k: rename(v) for k, v in data["weight_map"].items()}
         newdata["weight_map"] = newmap
         json.dump(newdata, f, indent=4)
     local_filenames.append(index)
 
-    operations = [
-        CommitOperationAdd(path_in_repo=local.split("/")[-1], path_or_fileobj=local) for local in local_filenames
+    return [
+        CommitOperationAdd(
+            path_in_repo=local.split("/")[-1], path_or_fileobj=local
+        )
+        for local in local_filenames
     ]
-
-    return operations
 
 
 def convert_single(model_id: str, folder: str) -> List["CommitOperationAdd"]:
@@ -87,8 +84,7 @@ def convert_single(model_id: str, folder: str) -> List["CommitOperationAdd"]:
     sf_name = "model.safetensors"
     sf_filename = os.path.join(folder, sf_name)
     convert_file(pt_filename, sf_filename)
-    operations = [CommitOperationAdd(path_in_repo=sf_name, path_or_fileobj=sf_filename)]
-    return operations
+    return [CommitOperationAdd(path_in_repo=sf_name, path_or_fileobj=sf_filename)]
 
 
 def convert_file(
@@ -111,8 +107,7 @@ def convert_file(
     save_file(loaded, sf_filename, metadata={"format": "pt"})
     check_file_size(sf_filename, pt_filename)
     reloaded = load_file(sf_filename)
-    for k in loaded:
-        pt_tensor = loaded[k]
+    for k, pt_tensor in loaded.items():
         sf_tensor = reloaded[k]
         if not torch.equal(pt_tensor, sf_tensor):
             raise RuntimeError(f"The output tensors do not match for key {k}")
@@ -197,7 +192,7 @@ def previous_pr(api: "HfApi", model_id: str, pr_title: str) -> Optional["Discuss
 def convert_generic(model_id: str, folder: str, filenames: Set[str]) -> List["CommitOperationAdd"]:
     operations = []
 
-    extensions = set([".bin", ".ckpt"])
+    extensions = {".bin", ".ckpt"}
     for filename in filenames:
         prefix, ext = os.path.splitext(filename)
         if ext in extensions:
@@ -218,7 +213,7 @@ def convert_generic(model_id: str, folder: str, filenames: Set[str]) -> List["Co
 def convert(api: "HfApi", model_id: str, force: bool = False) -> Optional["CommitInfo"]:
     pr_title = "Adding `safetensors` variant of this model"
     info = api.model_info(model_id)
-    filenames = set(s.rfilename for s in info.siblings)
+    filenames = {s.rfilename for s in info.siblings}
 
     with TemporaryDirectory() as d:
         folder = os.path.join(d, repo_folder_name(repo_id=model_id, repo_type="models"))

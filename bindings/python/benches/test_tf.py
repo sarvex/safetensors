@@ -30,8 +30,7 @@ def _save(filename, tensors, prefix=""):
 
 
 def create_gpt2(n_layers: int):
-    tensors = {}
-    tensors["wte"] = tf.zeros((50257, 768))
+    tensors = {"wte": tf.zeros((50257, 768))}
     tensors["wpe"] = tf.zeros((1024, 768))
     for i in range(n_layers):
         tensors[f"h.{i}.ln_1.weight"] = tf.zeros((768,))
